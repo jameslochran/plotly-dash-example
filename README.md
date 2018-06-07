@@ -18,5 +18,5 @@ The base code in this example was taken from this blog http://thisherelab.blogsp
 
 The CSS files in this example are the ones used in the official Dash example, https://github.com/plotly/dash-goldman-sachs-report-demo.  
 
-##license
+## license
 The contents of this repository are covered under the MIT License.
