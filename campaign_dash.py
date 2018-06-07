@@ -5,72 +5,28 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
-import csv
+#import re
 
 
-def readFromCsv(csv_name):
-	all_data = []
-	with open('%s.csv' % csv_name, 'rb') as f:
-		reader = csv.reader(f)
-		for row in reader:
-			all_data.append(row)
-	return all_data
-
-def getDashData():
-
-	all_data = readFromCsv('campaign_data')
-
-	ig_handles = []
-	images = []
-	campaigns = []
-	post_ids = []
-	post_urls = []
-	date_posteds = []
-	country = []
-	likes = []
-	comment_nos = []
-	post_engagements = []
-	expected_engagements = []
-	engagement_ratios = []
-
-	for row in all_data[1:]:
-		ig_handles.append(row[0])
-		images.append(row[1])
-		campaigns.append(row[2])
-		post_ids.append(row[3])
-		date_posteds.append(row[4])
-		country.append(row[5])
-		likes.append(int(row[6]))
-		comment_nos.append(int(row[7]))
-		post_engagements.append(float(row[8]))
-		expected_engagements.append(float(row[9]))
-		engagement_ratios.append(float(row[10]))
 
 
-	data = {'IG HANDLE': ig_handles,
-	        'IMAGE': images,
-	        'CAMPAIGN': campaigns,
-	        'POST ID': post_ids,
-	        'DATE POSTED': date_posteds,
-	        'COUNTRY': country,
-	        'LIKES': likes,
-	        'COMMENTS': comment_nos,
-	        'ENGAGEMENT RATE': post_engagements,
-	        'EXPECTED ENGAGEMENT': expected_engagements,
-	        'ENGAGEMENT RATIO': engagement_ratios}
+all_data = pd.read_csv('campaign_data.csv')
 
-	return pd.DataFrame(data)
+
+
+
+
+
 
 app = dash.Dash()
 
-df = getDashData()
-
+df = all_data
 metrics = ["LIKES","COMMENTS","ENGAGEMENT RATE","EXPECTED ENGAGEMENT","ENGAGEMENT RATIO"]
-campaigns = ["TFWGucci","DG Millennials","Bridging The Gap"]
+campaigns = ["Reduce your Footprint","Making the ROI Case","Bridging The Gap"]
 
 colour_dict = {}
-colour_dict["TFWGucci"] = 'rgb(240,21,22)'
-colour_dict["DG Millennials"] = 'rgb(22,96,185)'
+colour_dict["Reduce your Footprint"] = 'rgb(240,21,22)'
+colour_dict["Making the ROI Case"] = 'rgb(22,96,185)'
 colour_dict["Bridging The Gap"] = 'rgb(6,193,95)'
 
 external_css = [ "https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css",
@@ -84,6 +40,30 @@ for css in external_css:
 
 
 app.layout = html.Div([
+ 		html.Div([
+        html.Img(src="https://www.pcr-online.biz/.image/t_share/MTUxOTMyMjgxNDQ3NTg5MTU1/18-pcr-market-report-iconjpg.jpg",
+                style={
+                    'height': '50px',
+                    'float': 'right',
+                    'position': 'relative',
+                    'top':'0px',
+                    'bottom': '0px',
+                    'left': '0px'
+                },
+                ),
+        html.H2('Marketing Campaign Interactivity Report',
+                style={
+                    'position': 'relative',
+                    'top': '0px',
+                    'left': '0px',
+                    'font-family': 'Dosis',
+                    'display': 'inline',
+                    'font-size': '4.0rem',
+                    'color': '#4D637F'
+                }),
+
+
+    	], className='container', style={'padding':'0px','position': 'relative', 'right': '5px', 'width':'100%', 'color':'#fff'}),
 				html.Div([
 					html.Div([
 						html.H6('Choose Metric:', className = "gs-header gs-text-header padded")
@@ -100,7 +80,7 @@ app.layout = html.Div([
 						],
 						style={'width': '25%', 'display': 'inline-block'}
 					),
-				]),
+				], style={'width':'90%', 'padding-left':'80px'}),
 				html.Div([
 					html.Div([
 						dcc.Dropdown(
@@ -126,30 +106,32 @@ app.layout = html.Div([
 						],
 						style={'width': '25%', 'display': 'inline-block'}
 					)
-				]),
+				], style={'width':'90%', 'padding-left':'80px'}),
 				html.Div([
+				    html.H6('Click on the campaign name to remove it from the graph. The lines represent the average for each campaign.',style={'width':'90%', 'padding-left':'80px'} ),
 					html.Div([
 						dcc.Graph(id='main-graph')
 						],
-						style={'width': '100%', 'display': 'inline-block'}
+						style={'width': '80%', 'display': 'block', 'margin-left':'100px'}
 					),
 				],
 				className='row'
 				),
 				html.Div([
+					html.H4('Select a point above to see the details below.'),
 					html.Div([
 						html.H6('Selected Post:', className = "gs-header gs-text-header padded")
 						],
 						style={'width': '100%', 'display': 'inline-block'}
 					)
-				]),
+				], style={'width':'90%', 'padding-left':'80px'}),
 				html.Div([
 					html.Div([
 						html.A([
 							html.Img(id='selected-post-image',
 									style={'position': 'relative',
-										   'height' : '200',
-										   'width' : '200',
+										   'height' : '150',
+										   'width' : '150',
 										   'left' : '30%',
 										   'top' : '30'})
 							],
@@ -166,6 +148,7 @@ app.layout = html.Div([
 							target='_blank',
 							className='column',
 							style={'position': 'relative',
+									'display':'none',
 								   'left' : '27%',
 								   'top' : '5'}
 						),
@@ -219,7 +202,7 @@ def populate_country_selection(campaign_selection):
 
 '''*****************************************************************************************
 Selected Post functions
-*******************************************************************************************'''	
+*******************************************************************************************'''
 @app.callback(
     Output('selected-post-image', 'src'),
     [Input('main-graph', 'clickData'),
@@ -410,12 +393,12 @@ def display_selected_post_hyperlink(clickData,
 			df_campaigns = [df_country[df_country['CAMPAIGN'] == i] for i in campaign_selection]
 			for df_campaign in df_campaigns:
 				if post_id in df_campaign['POST ID'].values:
-					return "https://www.instagram.com/p/"+post_id
+					return None
 	return None
 
 '''*****************************************************************************************
 Graph functions
-*******************************************************************************************'''	
+*******************************************************************************************'''
 
 @app.callback(
 	dash.dependencies.Output('main-graph', 'figure'),
@@ -459,7 +442,7 @@ def update_graph(yaxis_column_name,
 		colour_count = 0
 		for df_campaign in df_campaigns:
 			data.append(go.Scatter( x=df_campaign["DATE POSTED"],
-									y=df_campaign[yaxis_column_name], 
+									y=df_campaign[yaxis_column_name],
 									customdata = df_campaign["POST ID"],
 									mode='markers',
 									name=campaign_selection[colour_count],
@@ -488,7 +471,7 @@ def update_graph(yaxis_column_name,
 			except ValueError:
 				pass
 			colour_count+=1
-		
+
 		y_axis_range = [0.0,1.1*max_y]
 
 		if not df_post.empty:
